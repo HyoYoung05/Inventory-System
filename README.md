@@ -101,13 +101,6 @@ If Cloudinary is not configured, product uploads fall back to local storage in `
 - `app/Database/Seeds/` optional starter data
 - `public/` public entry and uploaded assets
 
-## Important Before Uploading To GitHub
-
-- Do not commit real secrets in `.env`
-- Rotate any API keys or secrets that were shared or exposed during development
-- Keep `.env` local and commit only safe examples or commented placeholders
-- Verify your `app.baseURL` matches the environment you want to demo
-
 ## Notes
 
 This repo has evolved beyond the default CodeIgniter starter, so the documentation here reflects the current inventory-store implementation rather than the original framework boilerplate.
