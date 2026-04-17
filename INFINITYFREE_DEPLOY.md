@@ -8,11 +8,11 @@ Required production values:
 
 ```env
 CI_ENVIRONMENT = production
-app.baseURL = 'https://hyoyoung.22web.org/'
+app.baseURL = ''
 
-database.default.hostname = 'sql310.infinityfree.com'
-database.default.database = 'if0_41651793_inventory_system_db'
-database.default.username = 'if0_41651793'
+database.default.hostname = 'hostname'
+database.default.database = 'database'
+database.default.username = 'username'
 database.default.password = 'your_database_password'
 database.default.DBDriver = MySQLi
 ```
