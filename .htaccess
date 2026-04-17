@@ -3,10 +3,10 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    RewriteCond %{REQUEST_URI} !^/inventory-system-groupings/public/ [NC]
+    RewriteCond %{REQUEST_URI} !^/public/ [NC]
 
-    RewriteCond %{DOCUMENT_ROOT}/inventory-system-groupings/public/$1 -f [OR]
-    RewriteCond %{DOCUMENT_ROOT}/inventory-system-groupings/public/$1 -d
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -d
     RewriteRule ^(.*)$ public/$1 [L]
 
     RewriteRule ^$ public/index.php [L]
@@ -16,3 +16,7 @@ Options -Indexes
 <IfModule !mod_rewrite.c>
     DirectoryIndex index.php
 </IfModule>
+
+<FilesMatch "(^\.|composer\.(json|lock)$|^spark$|^phpunit\.xml(\.dist)?$|^preload\.php$|\.env)">
+    Require all denied
+</FilesMatch>

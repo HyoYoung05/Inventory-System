@@ -2,6 +2,61 @@
 
 <?= $this->section('content') ?>
 
+<style>
+    .orders-table td,
+    .orders-table th {
+        vertical-align: middle;
+    }
+
+    @media (max-width: 767.98px) {
+        .orders-table thead {
+            display: none;
+        }
+
+        .orders-table,
+        .orders-table tbody,
+        .orders-table tr,
+        .orders-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .orders-table tbody {
+            display: grid;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .orders-table tr {
+            padding: 1rem;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+        }
+
+        .orders-table td {
+            padding: 0.45rem 0;
+            border: 0;
+        }
+
+        .orders-table td::before {
+            content: attr(data-label);
+            display: block;
+            margin-bottom: 0.2rem;
+            color: #667085;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .orders-table td:last-child {
+            padding-top: 0.75rem;
+        }
+    }
+</style>
+
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
     <div>
         <h3 class="mb-1"><i class="bi bi-bag"></i> My Orders</h3>
@@ -17,7 +72,7 @@
         <h5 class="mb-0">Order History</h5>
     </div>
     <div class="table-responsive">
-        <table class="table align-middle mb-0">
+        <table class="table align-middle mb-0 orders-table">
             <thead>
                 <tr>
                     <th>Order</th>
@@ -54,15 +109,15 @@
                             };
                         ?>
                         <tr>
-                            <td>
+                            <td data-label="Order">
                                 <strong>#<?= esc($order['id']) ?></strong>
                                 <div class="small text-muted"><?= esc($order['customer_name']) ?></div>
                             </td>
-                            <td><?= date('M d, Y h:i A', strtotime($order['created_at'])) ?></td>
-                            <td><?= (int) ($order['total_items'] ?? 0) ?> item<?= ((int) ($order['total_items'] ?? 0) === 1) ? '' : 's' ?></td>
-                            <td><strong>&#8369;<?= number_format((float) $order['total_amount'], 2) ?></strong></td>
-                            <td><span class="badge <?= $statusClass ?>"><?= esc($statusLabel) ?></span></td>
-                            <td>
+                            <td data-label="Date"><?= date('M d, Y h:i A', strtotime($order['created_at'])) ?></td>
+                            <td data-label="Items"><?= (int) ($order['total_items'] ?? 0) ?> item<?= ((int) ($order['total_items'] ?? 0) === 1) ? '' : 's' ?></td>
+                            <td data-label="Total"><strong>&#8369;<?= number_format((float) $order['total_amount'], 2) ?></strong></td>
+                            <td data-label="Status"><span class="badge <?= $statusClass ?>"><?= esc($statusLabel) ?></span></td>
+                            <td data-label="Actions">
                                 <div class="d-flex flex-wrap gap-2">
                                     <a href="<?= site_url('user/orders/details/' . $order['id']) ?>" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye me-1"></i>Details

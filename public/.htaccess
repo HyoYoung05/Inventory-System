@@ -38,6 +38,11 @@ Options -Indexes
 	RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 </IfModule>
 
+# Block hidden files and common sensitive files from public access
+<FilesMatch "(^\.|composer\.(json|lock)$|^spark$|^phpunit\.xml(\.dist)?$|^preload\.php$|\.env)">
+	Require all denied
+</FilesMatch>
+
 <IfModule !mod_rewrite.c>
 	# If we don't have mod_rewrite installed, all 404's
 	# can be sent to index.php, and everything works as normal.

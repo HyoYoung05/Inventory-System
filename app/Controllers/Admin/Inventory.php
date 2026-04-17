@@ -115,7 +115,7 @@ class Inventory extends BaseController
         }
 
         $data = [
-            'pageTitle' => 'Adjust Stock Quantity',
+            'pageTitle' => 'Edit Product',
             'username' => session()->get('username'),
             'role' => session()->get('role'),
             'product' => $product,
@@ -259,9 +259,9 @@ class Inventory extends BaseController
             'id' => (int) $id,
             'category_id' => $existingProduct['category_id'],
             'sku' => $existingProduct['sku'],
-            'name' => $existingProduct['name'],
-            'description' => $existingProduct['description'],
-            'price' => $existingProduct['price'],
+            'name' => trim((string) $this->request->getPost('name')),
+            'description' => trim((string) $this->request->getPost('description')),
+            'price' => $this->request->getPost('price'),
             'stock_quantity' => $stockQuantity,
             'image_path' => $imagePath,
         ];
@@ -270,11 +270,31 @@ class Inventory extends BaseController
             return redirect()
                 ->back()
                 ->withInput()
-                ->with('error', 'Please provide a valid stock quantity.')
+                ->with('error', 'Please provide valid product details.')
                 ->with('errors', $productModel->errors());
         }
 
-        return redirect()->to('admin/inventory')->with('success', 'Product quantity updated successfully.');
+        return redirect()->to('admin/inventory')->with('success', 'Product updated successfully.');
+    }
+
+    public function delete($id)
+    {
+        if ($redirect = $this->ensureAuthorized()) {
+            return $redirect;
+        }
+
+        $productModel = new ProductModel();
+        $product = $productModel->find((int) $id);
+
+        if (!$product) {
+            return redirect()->to('admin/inventory')->with('error', 'Product not found.');
+        }
+
+        if (!$productModel->delete((int) $id)) {
+            return redirect()->to('admin/inventory')->with('error', 'Unable to delete the product right now.');
+        }
+
+        return redirect()->to('admin/inventory')->with('success', 'Product deleted successfully.');
     }
 
     public function categories()
@@ -329,6 +349,77 @@ class Inventory extends BaseController
         return redirect()->to('admin/categories')->with('success', 'Category added successfully.');
     }
 
+    public function editCategory($id)
+    {
+        if ($redirect = $this->ensureAuthorized()) {
+            return $redirect;
+        }
+
+        $categoryModel = new CategoryModel();
+        $category = $categoryModel->find((int) $id);
+
+        if (!$category) {
+            return redirect()->to('admin/categories')->with('error', 'Category not found.');
+        }
+
+        return view('admin/category_edit', [
+            'pageTitle' => 'Edit Category',
+            'username' => session()->get('username'),
+            'role' => session()->get('role'),
+            'category' => $category,
+        ]);
+    }
+
+    public function updateCategory($id)
+    {
+        if ($redirect = $this->ensureAuthorized()) {
+            return $redirect;
+        }
+
+        $categoryModel = new CategoryModel();
+        $category = $categoryModel->find((int) $id);
+
+        if (!$category) {
+            return redirect()->to('admin/categories')->with('error', 'Category not found.');
+        }
+
+        $data = [
+            'id' => (int) $id,
+            'name' => trim((string) $this->request->getPost('name')),
+            'description' => $category['description'] ?? '',
+        ];
+
+        if (!$categoryModel->save($data)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Please provide a valid category name.')
+                ->with('errors', $categoryModel->errors());
+        }
+
+        return redirect()->to('admin/categories')->with('success', 'Category name updated successfully.');
+    }
+
+    public function deleteCategory($id)
+    {
+        if ($redirect = $this->ensureAuthorized()) {
+            return $redirect;
+        }
+
+        $categoryModel = new CategoryModel();
+        $category = $categoryModel->find((int) $id);
+
+        if (!$category) {
+            return redirect()->to('admin/categories')->with('error', 'Category not found.');
+        }
+
+        if (!$categoryModel->delete((int) $id)) {
+            return redirect()->to('admin/categories')->with('error', 'Unable to delete the category right now.');
+        }
+
+        return redirect()->to('admin/categories')->with('success', 'Category deleted successfully.');
+    }
+
     private function ensureAuthorized()
     {
         if (!session()->get('isLoggedIn') || session()->get('role') !== 'admin') {
@@ -338,3 +429,7 @@ class Inventory extends BaseController
         return null;
     }
 }
+
+
+
+

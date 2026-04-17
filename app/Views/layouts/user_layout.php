@@ -47,6 +47,10 @@
             z-index: 1000;
         }
 
+        body.sidebar-collapsed .sidebar {
+            width: 92px;
+        }
+
         .sidebar .brand {
             padding: 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -54,12 +58,42 @@
             font-weight: 800;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
         }
 
         .sidebar .brand i {
             font-size: 1.8rem;
             color: var(--primary-color);
+        }
+
+        .brand-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .sidebar-toggle-btn {
+            width: 38px;
+            height: 38px;
+            border: 0;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        body.sidebar-collapsed .sidebar-toggle-btn i {
+            transform: rotate(180deg);
         }
 
         .sidebar-nav {
@@ -217,6 +251,11 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            transition: margin-left 0.3s ease;
+        }
+
+        body.sidebar-collapsed .main-content {
+            margin-left: 92px;
         }
 
         .content {
@@ -302,6 +341,14 @@
             .content {
                 padding: 15px;
             }
+
+            body.sidebar-collapsed .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar-toggle-btn {
+                display: none;
+            }
         }
 
         .sidebar::-webkit-scrollbar {
@@ -320,6 +367,37 @@
         .sidebar::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+
+        body.sidebar-collapsed .sidebar .brand span,
+        body.sidebar-collapsed .sidebar-nav a span,
+        body.sidebar-collapsed .sidebar-panel,
+        body.sidebar-collapsed .sidebar-user .user-details,
+        body.sidebar-collapsed .sidebar-user .btn-logout {
+            display: none !important;
+        }
+
+        body.sidebar-collapsed .sidebar-nav a {
+            justify-content: center;
+            padding: 15px 0;
+        }
+
+        body.sidebar-collapsed .sidebar-nav a:hover {
+            padding-left: 0;
+        }
+
+        body.sidebar-collapsed .sidebar-nav i {
+            width: auto;
+        }
+
+        body.sidebar-collapsed .sidebar-user {
+            display: flex;
+            justify-content: center;
+            padding: 15px 10px;
+        }
+
+        body.sidebar-collapsed .sidebar-user .user-info {
+            margin-bottom: 0;
+        }
     </style>
     <?php if (isset($additionalCSS)): ?>
         <?= $additionalCSS ?>
@@ -330,8 +408,13 @@
     <div class="wrapper">
         <aside class="sidebar">
             <div class="brand">
-                <i class="bi bi-bag-check"></i>
-                <span>Marketplace</span>
+                <div class="brand-main">
+                    <i class="bi bi-bag-check"></i>
+                    <span>Marketplace</span>
+                </div>
+                <button type="button" class="sidebar-toggle-btn" data-desktop-sidebar-toggle aria-label="Toggle sidebar">
+                    <i class="bi bi-chevron-double-left"></i>
+                </button>
             </div>
 
             <ul class="sidebar-nav">
@@ -410,8 +493,40 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.addEventListener('load', function () {
+            const toggle = document.querySelector('[data-desktop-sidebar-toggle]');
+            const storageKey = 'ims-user-sidebar-collapsed';
+
+            if (!toggle) {
+                return;
+            }
+
+            const syncState = function () {
+                if (window.innerWidth <= 768) {
+                    document.body.classList.remove('sidebar-collapsed');
+                    return;
+                }
+
+                if (localStorage.getItem(storageKey) === '1') {
+                    document.body.classList.add('sidebar-collapsed');
+                } else {
+                    document.body.classList.remove('sidebar-collapsed');
+                }
+            };
+
+            toggle.addEventListener('click', function () {
+                document.body.classList.toggle('sidebar-collapsed');
+                localStorage.setItem(storageKey, document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
+            });
+
+            window.addEventListener('resize', syncState);
+            syncState();
+        });
+    </script>
     <?php if (isset($additionalJS)): ?>
         <?= $additionalJS ?>
     <?php endif; ?>
 </body>
 </html>
+

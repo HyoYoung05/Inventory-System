@@ -32,9 +32,9 @@
     }
 
     .store-search-card {
-        margin-top: -2rem;
+        margin-top: 1rem;
         position: relative;
-        z-index: 2;
+        z-index: 1;
     }
 
     .store-search-card .card-body {
@@ -584,3 +584,7 @@
 </script>
 
 <?= $this->endSection() ?>
+
+
+
+

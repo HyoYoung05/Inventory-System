@@ -47,9 +47,20 @@ if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
  */
 
 // LOAD OUR PATHS CONFIG FILE
-// This is the line that might need to be changed, depending on your folder structure.
-require FCPATH . '../app/Config/Paths.php';
-// ^^^ Change this line if you move your application folder
+// Support both the normal CI4 structure and a shared-hosting layout
+// where the contents of `public/` are copied into the web root.
+$pathsPath = FCPATH . '../app/Config/Paths.php';
+
+if (! is_file($pathsPath)) {
+    $pathsPath = FCPATH . 'app/Config/Paths.php';
+}
+
+if (! is_file($pathsPath)) {
+    header('HTTP/1.1 503 Service Unavailable.', true, 503);
+    exit('Paths.php was not found. Check your deployment folder structure.');
+}
+
+require $pathsPath;
 
 $paths = new Paths();
 

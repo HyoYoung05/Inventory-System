@@ -17,11 +17,20 @@ class App extends BaseConfig
      * E.g., http://example.com/
      */
 
-    # Localhost URL
+    // Local development fallback only.
+    // Production deployments should override this through .env.
     public string $baseURL = 'http://localhost:8080/';
 
-    # Ngrok URL
+    //public string $baseURL = 'https://educators-penn-kurt-tracker.trycloudflare.com/';
+
+    // LocalTunnel URL for sharing only.
+    //public string $baseURL = 'https://afraid-zebras-tap.loca.lt/';
+
+    // Ngrok URL for testing only.
     // public string $baseURL = 'https://sweat-sensuous-dares.ngrok-free.dev/';
+
+    // Example production URL:
+    // public string $baseURL = 'https://hyoyoung.22web.org/';
 
 
     /**
@@ -206,3 +215,6 @@ class App extends BaseConfig
      */
     public bool $CSPEnabled = false;
 }
+
+
+

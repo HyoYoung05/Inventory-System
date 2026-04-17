@@ -22,8 +22,8 @@
             <thead>
                 <tr>
                     <th>Category Name</th>
-                    <th>Description</th>
                     <th>Created At</th>
+                    <th class="text-end">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,8 +35,20 @@
                     <?php foreach ($categories as $category): ?>
                         <tr>
                             <td><strong><?= esc($category['name']) ?></strong></td>
-                            <td><?= esc(substr($category['description'] ?? '', 0, 90)) ?></td>
                             <td><?= date('M d, Y', strtotime($category['created_at'])) ?></td>
+                            <td class="text-end">
+                                <div class="d-inline-flex flex-wrap gap-2 justify-content-end">
+                                    <a href="<?= site_url('admin/categories/edit/' . $category['id']) ?>" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </a>
+                                    <form method="POST" action="<?= site_url('admin/categories/delete/' . $category['id']) ?>" onsubmit="return confirm('Delete this category? This action cannot be undone.');">
+                                        <?= csrf_field() ?>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -46,3 +58,5 @@
 </div>
 
 <?= $this->endSection() ?>
+
+

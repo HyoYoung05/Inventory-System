@@ -7,7 +7,7 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h3><i class="bi bi-box-seam"></i> Inventory Management</h3>
-                <p class="text-muted mb-0">View inventory and adjust product quantities.</p>
+                <p class="text-muted mb-0">View inventory and edit product details.</p>
             </div>
             <a href="<?= site_url('admin/inventory/create') ?>" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Add Product
@@ -65,9 +65,17 @@
                             <td><?= $stock ?> unit<?= $stock === 1 ? '' : 's' ?></td>
                             <td><span class="badge <?= $statusClass ?>"><?= $statusLabel ?></span></td>
                             <td>
-                                <a href="<?= site_url('admin/inventory/edit/' . $product['id']) ?>" class="btn btn-sm btn-warning">
-                                    <i class="bi bi-pencil"></i> Adjust Quantity
-                                </a>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a href="<?= site_url('admin/inventory/edit/' . $product['id']) ?>" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                    <form method="POST" action="<?= site_url('admin/inventory/delete/' . $product['id']) ?>" onsubmit="return confirm('Delete this product? This action cannot be undone.');">
+                                        <?= csrf_field() ?>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -78,3 +86,7 @@
 </div>
 
 <?= $this->endSection() ?>
+
+
+
+

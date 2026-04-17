@@ -12,10 +12,19 @@
     <style>
         :root { --sidebar-bg:#131921; --sidebar-hover:#1f2937; --primary:#f59e0b; --primary-dark:#d97706; --ink:#132238; --soft:#617089; }
         body { margin:0; font-family:"Manrope","Segoe UI",sans-serif; color:var(--ink); background:linear-gradient(180deg,#f7f2ea 0%,#fdfbf8 35%,#eef5f4 100%); }
-        .page-shell { display:flex; min-height:100vh; }
-        .sidebar { width:280px; background:var(--sidebar-bg); color:#fff; position:fixed; inset:0 auto 0 0; overflow-y:auto; }
-        .brand { padding:20px; border-bottom:1px solid rgba(255,255,255,.1); font-size:1.35rem; font-weight:800; display:flex; align-items:center; gap:10px; }
+        .page-shell { display:flex; min-height:100vh; position:relative; }
+        .sidebar-backdrop { position:fixed; inset:0; background:rgba(15,23,42,.45); opacity:0; pointer-events:none; transition:opacity .25s ease; z-index:999; }
+        .mobile-topbar { display:none; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem; padding:.9rem 1rem; border:1px solid rgba(15,23,42,.08); border-radius:18px; background:rgba(255,255,255,.92); box-shadow:0 12px 30px rgba(15,23,42,.07); }
+        .mobile-topbar-title { font-weight:800; color:var(--ink); }
+        .mobile-menu-btn { display:inline-flex; align-items:center; gap:.5rem; border-radius:12px; font-weight:700; }
+        .sidebar { width:280px; background:var(--sidebar-bg); color:#fff; position:fixed; inset:0 auto 0 0; overflow-y:auto; transition:transform .25s ease, width .25s ease; z-index:1000; }
+        body.sidebar-collapsed .sidebar { width:92px; }
+        .brand { padding:20px; border-bottom:1px solid rgba(255,255,255,.1); font-size:1.35rem; font-weight:800; display:flex; align-items:center; justify-content:space-between; gap:10px; }
         .brand i { font-size:1.8rem; color:var(--primary); }
+        .brand-main { display:flex; align-items:center; gap:10px; min-width:0; }
+        .sidebar-toggle-btn { width:38px; height:38px; border:0; border-radius:12px; background:rgba(255,255,255,.08); color:#fff; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s ease; }
+        .sidebar-toggle-btn:hover { background:rgba(255,255,255,.16); }
+        body.sidebar-collapsed .sidebar-toggle-btn i { transform:rotate(180deg); }
         .sidebar-nav { list-style:none; margin:20px 0; padding:0; }
         .sidebar-nav a { display:flex; align-items:center; gap:12px; padding:15px 20px; color:rgba(255,255,255,.82); text-decoration:none; border-left:4px solid transparent; transition:.2s ease; }
         .sidebar-nav a:hover { background:var(--sidebar-hover); color:#fff; border-left-color:var(--primary); padding-left:24px; }
@@ -34,7 +43,8 @@
         .user-role { font-size:.75rem; color:rgba(255,255,255,.6); text-transform:uppercase; }
         .user-info:hover .user-name, .user-info:hover .user-role { color:#fff; }
         .btn-logout { width:100%; padding:8px; background:#e74c3c; color:#fff; border:none; border-radius:8px; text-decoration:none; text-align:center; display:block; font-size:.85rem; }
-        .main-content { margin-left:280px; flex:1; }
+        .main-content { margin-left:280px; flex:1; transition:margin-left .25s ease; }
+        body.sidebar-collapsed .main-content { margin-left:92px; }
         .shell { width:min(1180px,calc(100% - 2rem)); margin:0 auto; padding:1.5rem 0 3rem; }
         .hero, .search-card, .section-shell { border:1px solid rgba(19,34,56,.08); border-radius:28px; background:rgba(255,255,255,.9); box-shadow:0 24px 70px rgba(20,35,57,.08); }
         .hero { margin-top:1.25rem; padding:2rem; background:radial-gradient(circle at top right,rgba(245,158,11,.25),transparent 28%),linear-gradient(135deg,#0f172a,#1f2937 58%,#334155); color:#fff; }
@@ -48,12 +58,15 @@
         .product-trigger { display:flex; flex:1; flex-direction:column; width:100%; height:100%; padding:0; border:0; background:transparent; text-align:left; color:inherit; }
         .product-visual { display:grid; place-items:center; overflow:hidden; height:160px; margin-bottom:1rem; border-radius:22px; background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(29,78,216,.12)); font-size:3rem; font-weight:800; color:#101828; }
         .product-visual img { width:100%; height:100%; object-fit:cover; }
-        .meta { display:flex; justify-content:space-between; gap:.75rem; margin-bottom:.75rem; font-size:.85rem; color:var(--soft); }
-        .name { margin-bottom:.35rem; font-size:1.08rem; font-weight:800; }
-        .description { display:-webkit-box; min-height:4.2rem; margin-bottom:1rem; overflow:hidden; color:var(--soft); font-size:.92rem; -webkit-box-orient:vertical; -webkit-line-clamp:3; }
-        .product-card-footer { display:flex; justify-content:space-between; align-items:center; gap:.75rem; margin-top:auto; }
-        .price { font-size:1.45rem; font-weight:800; }
-        .stock { color:var(--soft); font-size:.9rem; white-space:nowrap; }
+        .meta { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:start; gap:.75rem; min-height:2.6rem; margin-bottom:.75rem; font-size:.85rem; color:var(--soft); }
+        .meta span { min-width:0; }
+        .meta span:last-child { text-align:right; overflow-wrap:anywhere; }
+        .name { display:-webkit-box; min-height:2.8rem; margin-bottom:.35rem; overflow:hidden; font-size:1.08rem; font-weight:800; line-height:1.3; line-clamp:2; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+        .description { display:-webkit-box; min-height:5.5rem; margin-bottom:1rem; overflow:hidden; color:var(--soft); font-size:.92rem; line-height:1.45; line-clamp:3; -webkit-box-orient:vertical; -webkit-line-clamp:3; }
+        .product-card-footer { margin-top:auto; min-height:4rem; }
+        .price-block { display:flex; flex-direction:column; gap:.25rem; min-height:4rem; }
+        .price { font-size:1.45rem; font-weight:800; line-height:1.1; }
+        .stock { color:var(--soft); font-size:.9rem; line-height:1.35; text-align:left; white-space:normal; word-break:break-word; overflow-wrap:anywhere; }
         .product-actions { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-top:1rem; }
         .product-actions form { margin:0; }
         .product-actions .btn { width:100%; border-radius:14px; font-weight:700; }
@@ -70,15 +83,31 @@
         .modal-action-grid .btn { width:100%; border-radius:14px; font-weight:700; }
         @media (max-width:1399.98px) { .product-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
         @media (max-width:1199.98px) { .product-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
-        @media (max-width:767.98px) { .product-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        @media (max-width:767.98px) { .product-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .product-actions { grid-template-columns:1fr; } .modal-action-grid { grid-template-columns:1fr; } }
         @media (max-width:575.98px) { .product-grid { grid-template-columns:1fr; } }
-        @media (max-width:768px) { .sidebar { width:0; padding:0; } .main-content { margin-left:0; } }
+        body.sidebar-collapsed .brand span,
+        body.sidebar-collapsed .sidebar-nav a span,
+        body.sidebar-collapsed .sidebar-panel,
+        body.sidebar-collapsed .sidebar-user .user-details,
+        body.sidebar-collapsed .sidebar-user .btn-logout { display:none !important; }
+        body.sidebar-collapsed .sidebar-nav a { justify-content:center; padding:15px 0; }
+        body.sidebar-collapsed .sidebar-nav a:hover { padding-left:0; }
+        body.sidebar-collapsed .sidebar-nav i { width:auto; }
+        body.sidebar-collapsed .sidebar-user { display:flex; justify-content:center; padding:15px 10px; }
+        body.sidebar-collapsed .sidebar-user .user-info { margin-bottom:0; }
+        @media (max-width:991.98px) { body.sidebar-open { overflow:hidden; } .sidebar { transform:translateX(-100%); box-shadow:0 24px 60px rgba(15,23,42,.25); } .sidebar.is-open { transform:translateX(0); } .sidebar-backdrop.is-active { opacity:1; pointer-events:auto; } .mobile-topbar { display:flex; } .main-content { margin-left:0; } body.sidebar-collapsed .main-content { margin-left:0; } .shell { width:min(100%,calc(100% - 1rem)); padding:1rem 0 2rem; } .hero { margin-top:0; padding:1.5rem; } .sidebar-toggle-btn { display:none; } }
     </style>
 </head>
 <body>
     <div class="page-shell">
-        <aside class="sidebar">
-            <div class="brand"><i class="bi bi-bag-check"></i><span>Marketplace</span></div>
+        <div class="sidebar-backdrop" data-sidebar-backdrop></div>
+        <aside class="sidebar" data-sidebar>
+            <div class="brand">
+                <div class="brand-main"><i class="bi bi-bag-check"></i><span>Marketplace</span></div>
+                <button type="button" class="sidebar-toggle-btn" data-desktop-sidebar-toggle aria-label="Toggle sidebar">
+                    <i class="bi bi-chevron-double-left"></i>
+                </button>
+            </div>
             <ul class="sidebar-nav">
                 <?php if ($isLoggedIn && $role === 'user'): ?>
                     <li><a href="<?= site_url('user/dashboard') ?>"><i class="bi bi-graph-up"></i><span>Dashboard</span></a></li>
@@ -133,7 +162,7 @@
                     <a href="<?= site_url('auth/logout') ?>" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
                 <?php elseif ($isLoggedIn): ?>
                     <div class="user-info">
-                        <div class="user-avatar"><?= strtoupper(substr(esc($dashboardLabel), 0, 1)) ?></div>
+                        <div class="user-avatar"><?= strtoupper(substr((string) esc($dashboardLabel), 0, 1)) ?></div>
                         <div class="user-details"><div class="user-name"><?= esc($dashboardLabel) ?></div><div class="user-role"><?= esc($role ?: 'user') ?></div></div>
                     </div>
                     <a href="<?= site_url('auth/logout') ?>" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
@@ -149,6 +178,12 @@
         </aside>
         <main class="main-content">
             <div class="shell">
+                <div class="mobile-topbar">
+                    <button type="button" class="btn btn-outline-dark mobile-menu-btn" data-sidebar-toggle>
+                        <i class="bi bi-list"></i> Menu
+                    </button>
+                    <div class="mobile-topbar-title">Marketplace</div>
+                </div>
                 <section class="hero">
                     <h1>Browse all products.</h1>
                     <p>Anyone can explore the catalog here. Sign in or create a buyer account when you're ready to add items to cart and checkout.</p>
@@ -191,8 +226,10 @@
                                         <div class="name"><?= esc($product['name']) ?></div>
                                         <div class="description"><?= esc($product['description'] ?: 'Available in the store catalog.') ?></div>
                                         <div class="product-card-footer">
-                                            <div class="price">&#8369;<?= number_format((float) $product['price'], 2) ?></div>
-                                            <div class="stock"><?= $stock ?> unit<?= $stock === 1 ? '' : 's' ?> available</div>
+                                            <div class="price-block">
+                                                <div class="price">&#8369;<?= number_format((float) $product['price'], 2) ?></div>
+                                                <div class="stock"><?= $stock ?> unit<?= $stock === 1 ? '' : 's' ?> available</div>
+                                            </div>
                                         </div>
                                     </button>
                                     <div class="product-actions">
@@ -288,5 +325,72 @@
         </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.addEventListener("load", function () {
+            const sidebar = document.querySelector("[data-sidebar]");
+            const backdrop = document.querySelector("[data-sidebar-backdrop]");
+            const toggles = document.querySelectorAll("[data-sidebar-toggle]");
+            const desktopToggle = document.querySelector("[data-desktop-sidebar-toggle]");
+            const storageKey = "ims-browse-sidebar-collapsed";
+
+            if (sidebar && backdrop && toggles.length) {
+                const closeSidebar = function () {
+                    sidebar.classList.remove("is-open");
+                    backdrop.classList.remove("is-active");
+                    document.body.classList.remove("sidebar-open");
+                };
+
+                const openSidebar = function () {
+                    sidebar.classList.add("is-open");
+                    backdrop.classList.add("is-active");
+                    document.body.classList.add("sidebar-open");
+                };
+
+                toggles.forEach(function (toggle) {
+                    toggle.addEventListener("click", function () {
+                        if (sidebar.classList.contains("is-open")) {
+                            closeSidebar();
+                        } else {
+                            openSidebar();
+                        }
+                    });
+                });
+
+                backdrop.addEventListener("click", closeSidebar);
+                window.addEventListener("resize", function () {
+                    if (window.innerWidth > 991.98) {
+                        closeSidebar();
+                    }
+                });
+            }
+
+            if (desktopToggle) {
+                const syncDesktopState = function () {
+                    if (window.innerWidth <= 991.98) {
+                        document.body.classList.remove("sidebar-collapsed");
+                        return;
+                    }
+
+                    if (localStorage.getItem(storageKey) === "1") {
+                        document.body.classList.add("sidebar-collapsed");
+                    } else {
+                        document.body.classList.remove("sidebar-collapsed");
+                    }
+                };
+
+                desktopToggle.addEventListener("click", function () {
+                    document.body.classList.toggle("sidebar-collapsed");
+                    localStorage.setItem(storageKey, document.body.classList.contains("sidebar-collapsed") ? "1" : "0");
+                });
+
+                window.addEventListener("resize", syncDesktopState);
+                syncDesktopState();
+            }
+        });
+    </script>
 </body>
 </html>
+
+
+
+

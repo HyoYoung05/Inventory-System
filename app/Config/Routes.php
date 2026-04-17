@@ -1,4 +1,4 @@
-`<?php
+<?php
 
 use CodeIgniter\Router\RouteCollection;
 
@@ -35,9 +35,13 @@ $routes->group('admin', ['filter' => 'roleAuth:admin'], function($routes) {
     $routes->post('inventory/store', 'Admin\Inventory::storeProduct');
     $routes->get('inventory/edit/(:num)', 'Admin\Inventory::edit/$1');
     $routes->post('inventory/update/(:num)', 'Admin\Inventory::update/$1');
+    $routes->post('inventory/delete/(:num)', 'Admin\Inventory::delete/$1');
     $routes->get('categories', 'Admin\Inventory::categories');
     $routes->get('categories/create', 'Admin\Inventory::createCategory');
     $routes->post('categories/store', 'Admin\Inventory::storeCategory');
+    $routes->get('categories/edit/(:num)', 'Admin\Inventory::editCategory/$1');
+    $routes->post('categories/update/(:num)', 'Admin\Inventory::updateCategory/$1');
+    $routes->post('categories/delete/(:num)', 'Admin\Inventory::deleteCategory/$1');
     $routes->get('orders', 'Admin\Orders::index');
     $routes->get('orders/details/(:num)', 'Admin\Orders::details/$1');
     $routes->post('orders/updateStatus/(:num)', 'Admin\Orders::updateStatus/$1');
@@ -79,3 +83,6 @@ $routes->group('user', ['filter' => 'roleAuth:admin,staff,user'], function($rout
 
 // Global Products Route - accessible to all logged in users
 $routes->get('products', 'Products::index', ['filter' => 'roleAuth:admin,staff,user']);
+
+
+
